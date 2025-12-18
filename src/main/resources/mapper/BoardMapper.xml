@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ssafy.bokduck.mapper.BoardMapper">
+    <insert id="insertPost" parameterType="ssafy.bokduck.dto.BoardPostDto" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO board_posts (user_id, title, content, category, created_at, updated_at, is_deleted)
+        VALUES (#{userId}, #{title}, #{content}, #{category}, NOW(), NOW(), false)
+    </insert>
+
+    <select id="findAllPosts" resultType="ssafy.bokduck.dto.BoardPostDto">
+        SELECT * FROM board_posts WHERE is_deleted = false ORDER BY created_at DESC
+    </select>
+
+    <select id="findPostById" resultType="ssafy.bokduck.dto.BoardPostDto">
+        SELECT * FROM board_posts WHERE post_id = #{postId} AND is_deleted = false
+    </select>
+
+    <update id="updatePost" parameterType="ssafy.bokduck.dto.BoardPostDto">
+        UPDATE board_posts
+        SET title = #{title},
+            content = #{content},
+            category = #{category},
+            updated_at = NOW()
+        WHERE post_id = #{postId}
+    </update>
+
+    <update id="deletePost">
+        UPDATE board_posts SET is_deleted = true WHERE post_id = #{postId}
+    </update>
+    
+    <update id="incrementViewCount">
+        UPDATE board_posts SET view_count = view_count + 1 WHERE post_id = #{postId}
+    </update>
+    
+    <insert id="insertComment" parameterType="ssafy.bokduck.dto.BoardCommentDto" useGeneratedKeys="true" keyProperty="commentId">
+        INSERT INTO board_comments (post_id, user_id, parent_id, content, created_at, updated_at, is_deleted)
+        VALUES (#{postId}, #{userId}, #{parentId}, #{content}, NOW(), NOW(), false)
+    </insert>
+    
+    <select id="findCommentsByPostId" resultType="ssafy.bokduck.dto.BoardCommentDto">
+        SELECT * FROM board_comments WHERE post_id = #{postId} AND is_deleted = false ORDER BY created_at ASC
+    </select>
+    
+    <update id="deleteComment">
+        UPDATE board_comments SET is_deleted = true WHERE comment_id = #{commentId}
+    </update>
+</mapper>

@@ -1,0 +1,172 @@
+# Project Setup Guide (for PC Bang / New Environment)
+
+## 1. Prerequisites (Required Software)
+
+Before running the project, you need to install the following software:
+
+*   **Java Development Kit (JDK) 25**:
+    *   The project is configured for **Java 25**.
+    *   Ensure `JAVA_HOME` environment variable is set up.
+    *   Verify with: `java -version`
+
+*   **MySQL Server**:
+    *   Version 8.0 or higher recommended.
+    *   Need a user with `root` / `0000` (or update [application.yml](file:///c:/Users/Administrator/Desktop/bokduck2/src/main/resources/application.yml) matches your setup).
+
+## 2. Database Setup
+
+1.  Open your MySQL Client (Workbench, DBeaver, or Command Line).
+2.  Create the database:
+    ```sql
+    CREATE DATABASE bokduck;
+    ```
+3.  Run the following SQL to safely create all tables (copy & paste all):
+
+```sql
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 1. Drop old tables (Clean Slate)
+DROP TABLE IF EXISTS `property_scraps`;
+DROP TABLE IF EXISTS `properties`;
+DROP TABLE IF EXISTS `dongcodes`;
+DROP TABLE IF EXISTS `houseinfos`;
+DROP TABLE IF EXISTS `housedeals`;
+DROP TABLE IF EXISTS `llm_requests`;
+
+-- 2. Create Dong Codes
+CREATE TABLE `dongcodes` (
+  `dong_code` VARCHAR(10) NOT NULL COMMENT '법정동코드',
+  `sido_name` VARCHAR(30) NULL DEFAULT NULL COMMENT '시도이름',
+  `gugun_name` VARCHAR(30) NULL DEFAULT NULL COMMENT '구군이름',
+  `dong_name` VARCHAR(30) NULL DEFAULT NULL COMMENT '동이름',
+  PRIMARY KEY (`dong_code`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT '법정동코드테이블';
+
+-- 3. Create House Infos
+CREATE TABLE `houseinfos` (
+  `apt_seq` VARCHAR(20) NOT NULL COMMENT '아파트코드',
+  `sgg_cd` VARCHAR(5) NULL DEFAULT NULL COMMENT '시군구코드',
+  `umd_cd` VARCHAR(5) NULL DEFAULT NULL COMMENT '읍면동코드',
+  `umd_nm` VARCHAR(20) NULL DEFAULT NULL COMMENT '읍면동이름',
+  `jibun` VARCHAR(10) NULL DEFAULT NULL COMMENT '지번',
+  `road_nm_sgg_cd` VARCHAR(5) NULL DEFAULT NULL COMMENT '도로명시군구코드',
+  `road_nm` VARCHAR(20) NULL DEFAULT NULL COMMENT '도로명',
+  `road_nm_bonbun` VARCHAR(10) NULL DEFAULT NULL COMMENT '도로명기초번호',
+  `road_nm_bubun` VARCHAR(10) NULL DEFAULT NULL COMMENT '도로명추가번호',
+  `apt_nm` VARCHAR(40) NULL DEFAULT NULL COMMENT '아파트이름',
+  `build_year` INT NULL DEFAULT NULL COMMENT '준공년도',
+  `latitude` VARCHAR(45) NULL DEFAULT NULL COMMENT '위도',
+  `longitude` VARCHAR(45) NULL DEFAULT NULL COMMENT '경도',
+  PRIMARY KEY (`apt_seq`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT '주택정보테이블';
+
+-- 4. Create House Deals
+CREATE TABLE `housedeals` (
+  `no` INT NOT NULL AUTO_INCREMENT COMMENT '거래번호',
+  `apt_seq` VARCHAR(20) NULL DEFAULT NULL COMMENT '아파트코드',
+  `apt_dong` VARCHAR(40) NULL DEFAULT NULL COMMENT '아파트동',
+  `floor` VARCHAR(3) NULL DEFAULT NULL COMMENT '아파트층',
+  `deal_year` INT NULL DEFAULT NULL COMMENT '거래년도',
+  `deal_month` INT NULL DEFAULT NULL COMMENT '거래월',
+  `deal_day` INT NULL DEFAULT NULL COMMENT '거래일',
+  `exclu_use_ar` DECIMAL(7,2) NULL DEFAULT NULL  comment '아파트면적',
+  `deal_amount` VARCHAR(10) NULL DEFAULT NULL  comment '거래가격',
+  PRIMARY KEY (`no`),
+  CONSTRAINT `apt_seq_to_house_info` FOREIGN KEY (`apt_seq`) REFERENCES `houseinfos` (`apt_seq`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT '주택거래정보테이블';
+
+-- 5. Create Property Scraps
+CREATE TABLE `property_scraps` (
+    `user_id` BIGINT NOT NULL,
+    `apt_seq` VARCHAR(20) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`user_id`, `apt_seq`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`apt_seq`) REFERENCES `houseinfos`(`apt_seq`) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+-- 6. Create Board Posts
+CREATE TABLE `board_posts` (
+    `post_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `content` TEXT,
+    `category` VARCHAR(50),
+    `view_count` INT DEFAULT 0,
+    `is_deleted` BOOLEAN DEFAULT FALSE,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+);
+
+-- 7. Create Board Comments
+CREATE TABLE `board_comments` (
+    `comment_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id` BIGINT NOT NULL,
+    `user_id` BIGINT NOT NULL,
+    `parent_id` BIGINT, 
+    `content` TEXT NOT NULL,
+    `is_deleted` BOOLEAN DEFAULT FALSE,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`post_id`) REFERENCES `board_posts`(`post_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+);
+
+-- 8. Create Users
+CREATE TABLE IF NOT EXISTS `users` (
+    `user_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(100),
+    `phone` VARCHAR(20),
+    `status` VARCHAR(20) DEFAULT 'ACTIVE',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 9. Create LLM Requests
+CREATE TABLE `llm_requests` (
+    `llm_request_id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT,
+    `apt_seq` VARCHAR(20) NULL,
+    `type` VARCHAR(50), 
+    `prompt` TEXT,
+    `response` TEXT, 
+    `condition_json` TEXT, 
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- (Optional) If you have a dump.sql file, Import it now.
+```
+
+## 3. Project Configuration ([src/main/resources/application.yml](file:///c:/Users/Administrator/Desktop/bokduck2/src/main/resources/application.yml))
+Ensure this file matches your PC Bang environment:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/bokduck?serverTimezone=UTC&characterEncoding=UTF-8
+    username: root    # Change if needed
+    password: "0000"  # Change if needed
+```
+
+## 4. Run the Application
+
+Open a terminal in the project folder and run:
+
+**Windows (PowerShell/CMD):**
+```bash
+./gradlew bootRun
+```
+
+**Mac/Linux:**
+```bash
+chmod +x gradlew
+./gradlew bootRun
+```
+
+The server will start at `http://localhost:8080`.
+Swagger UI: `http://localhost:8080/swagger-ui/index.html`

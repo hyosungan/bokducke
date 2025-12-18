@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ssafy.bokduck.mapper.LlmMapper">
+    <insert id="insertRequest" parameterType="ssafy.bokduck.dto.LlmRequestDto" useGeneratedKeys="true" keyProperty="llmRequestId">
+        INSERT INTO llm_requests (user_id, apt_seq, type, prompt, response, condition_json, created_at)
+        VALUES (#{userId}, #{aptSeq}, #{type}, #{prompt}, #{response}, #{conditionJson}, NOW())
+    </insert>
+
+    <select id="findById" resultType="ssafy.bokduck.dto.LlmRequestDto">
+        SELECT * FROM llm_requests WHERE llm_request_id = #{llmRequestId}
+    </select>
+</mapper>
