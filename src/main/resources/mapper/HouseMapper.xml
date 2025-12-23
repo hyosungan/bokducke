@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ssafy.bokduck.mapper.HouseMapper">
 
     <!-- House Info Result Map -->
@@ -18,12 +17,12 @@
         <result property="buildYear" column="build_year"/>
         <result property="latitude" column="latitude"/>
         <result property="longitude" column="longitude"/>
-        <result property="latestDealAmount" column="latest_deal_amount"/>
-        <result property="latestDealYear" column="latest_deal_year"/>
-        <result property="latestDealMonth" column="latest_deal_month"/>
-        <result property="latestDealDay" column="latest_deal_day"/>
-        <result property="latestDealFloor" column="latest_deal_floor"/>
-        <result property="latestDealArea" column="latest_deal_area"/>
+        <result property="latestDealAmount" column="latest_deal_amount" jdbcType="VARCHAR"/>
+        <result property="latestDealYear" column="latest_deal_year" jdbcType="INTEGER"/>
+        <result property="latestDealMonth" column="latest_deal_month" jdbcType="INTEGER"/>
+        <result property="latestDealDay" column="latest_deal_day" jdbcType="INTEGER"/>
+        <result property="latestDealFloor" column="latest_deal_floor" jdbcType="VARCHAR"/>
+        <result property="latestDealArea" column="latest_deal_area" jdbcType="DECIMAL"/>
     </resultMap>
 
     <!-- House Deal Result Map -->
@@ -93,14 +92,18 @@
             ) hd2 ON hd1.apt_seq = hd2.apt_seq AND hd1.no = hd2.max_no
         ) d ON h.apt_seq = d.apt_seq
         <where>
-            <if test="umdNm != null and umdNm != ''">
-                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+            <!-- 🔥 지역 필터링: 튜플 매칭만 사용 (dongName 폴백 완전 제거) -->
+            <if test="sggUmdPairs != null and sggUmdPairs.size() > 0">
+            AND h.sgg_cd IS NOT NULL 
+            AND h.umd_cd IS NOT NULL 
+            AND (h.sgg_cd, h.umd_cd) IN
+            <foreach collection="sggUmdPairs" item="pair" open="(" separator="," close=")">
+                (#{pair.sggCd}, #{pair.umdCd})
+            </foreach>
             </if>
-            <if test="umdNmList != null and umdNmList.size() > 0">
-                AND h.umd_nm IN
-                <foreach collection="umdNmList" item="name" open="(" separator="," close=")">
-                    #{name}
-                </foreach>
+            <!-- umdNm만 있고 sidoName/gugunName이 없을 때만 WHERE 절에서 필터링 (JOIN 없이) -->
+            <if test="umdNm != null and umdNm != '' and (sidoName == null or sidoName == '') and (gugunName == null or gugunName == '')">
+                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
             </if>
             <if test="aptName != null and aptName != ''">
                 AND h.apt_nm LIKE CONCAT('%', #{aptName}, '%')
@@ -144,14 +147,18 @@
             ) hd2 ON hd1.apt_seq = hd2.apt_seq AND hd1.no = hd2.max_no
         ) d ON h.apt_seq = d.apt_seq
         <where>
-            <if test="umdNm != null and umdNm != ''">
-                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+            <!-- 🔥 지역 필터링: 튜플 매칭만 사용 (dongName 폴백 완전 제거) -->
+            <if test="sggUmdPairs != null and sggUmdPairs.size() > 0">
+            AND h.sgg_cd IS NOT NULL 
+            AND h.umd_cd IS NOT NULL 
+            AND (h.sgg_cd, h.umd_cd) IN
+            <foreach collection="sggUmdPairs" item="pair" open="(" separator="," close=")">
+                (#{pair.sggCd}, #{pair.umdCd})
+            </foreach>
             </if>
-            <if test="umdNmList != null and umdNmList.size() > 0">
-                AND h.umd_nm IN
-                <foreach collection="umdNmList" item="name" open="(" separator="," close=")">
-                    #{name}
-                </foreach>
+            <!-- umdNm만 있고 sidoName/gugunName이 없을 때만 WHERE 절에서 필터링 (JOIN 없이) -->
+            <if test="umdNm != null and umdNm != '' and (sidoName == null or sidoName == '') and (gugunName == null or gugunName == '')">
+                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
             </if>
             <if test="aptName != null and aptName != ''">
                 AND h.apt_nm LIKE CONCAT('%', #{aptName}, '%')
@@ -190,15 +197,38 @@
         WHERE dong_name LIKE CONCAT('%', #{dongName}, '%')
     </select>
     
-    <!-- Get Gugun Names (시/군/구 목록) -->
+    <!-- Get Sido Names (시/도 목록) -->
+    <select id="getSidoNames" resultType="string">
+        SELECT DISTINCT sido_name
+        FROM dongcodes
+        WHERE sido_name IS NOT NULL AND sido_name != ''
+        ORDER BY sido_name
+    </select>
+    
+    <!-- Get Gugun Names (시/군/구 목록) - 전체 또는 시/도로 필터링 -->
     <select id="getGugunNames" resultType="string">
         SELECT DISTINCT gugun_name
         FROM dongcodes
         WHERE gugun_name IS NOT NULL AND gugun_name != ''
+        <if test="sidoName != null and sidoName != ''">
+        AND sido_name = #{sidoName}
+        </if>
         ORDER BY gugun_name
     </select>
     
-    <!-- Get Dongs by Gugun (특정 시/군/구의 읍/면/동 목록) -->
+    <!-- Get Dongs by Sido and Gugun (특정 시/도와 시/군/구의 읍/면/동 목록) -->
+    <select id="getDongsBySidoAndGugun" resultMap="DongCodeResultMap">
+        SELECT DISTINCT dong_code, sido_name, gugun_name, dong_name
+        FROM dongcodes
+        WHERE gugun_name = #{gugunName}
+        <if test="sidoName != null and sidoName != ''">
+        AND sido_name = #{sidoName}
+        </if>
+        AND dong_name IS NOT NULL AND dong_name != ''
+        ORDER BY dong_name
+    </select>
+    
+    <!-- Get Dongs by Gugun (기존 메서드 - 하위 호환성 유지) -->
     <select id="getDongsByGugun" parameterType="string" resultMap="DongCodeResultMap">
         SELECT DISTINCT dong_code, sido_name, gugun_name, dong_name
         FROM dongcodes
@@ -206,7 +236,16 @@
         AND dong_name IS NOT NULL AND dong_name != ''
         ORDER BY dong_name
     </select>
-
+    
+    <!-- Get Dong Codes by Sido (특정 시/도의 모든 dong_code 목록 조회) -->
+    <select id="getDongCodesBySido" resultMap="DongCodeResultMap">
+        SELECT DISTINCT dong_code, sido_name, gugun_name, dong_name
+        FROM dongcodes
+        WHERE sido_name = #{sidoName}
+        AND dong_code IS NOT NULL AND dong_code != ''
+        ORDER BY dong_code
+    </select>
+    
     <!-- Scraps -->
     <insert id="insertScrap" parameterType="ssafy.bokduck.dto.PropertyScrapDto">
         INSERT INTO property_scraps (user_id, apt_seq, created_at)
@@ -227,8 +266,9 @@
     <select id="findScrappedHouses" parameterType="long" resultMap="HouseInfoResultMap">
         SELECT h.*
         FROM houseinfos h
-        JOIN property_scraps ps ON h.apt_seq = ps.apt_seq
+        INNER JOIN property_scraps ps ON h.apt_seq = ps.apt_seq
         WHERE ps.user_id = #{userId}
+        ORDER BY ps.created_at DESC
     </select>
 
 </mapper>

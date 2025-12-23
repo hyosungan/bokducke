@@ -22,8 +22,11 @@ public interface HouseMapper {
 
     // Dong Codes
     List<DongCodeDto> searchDongCodes(String dongName);
-    List<String> getGugunNames(); // 시/군/구 목록 조회
-    List<DongCodeDto> getDongsByGugun(String gugunName); // 특정 시/군/구의 읍/면/동 목록 조회
+    List<String> getSidoNames(); // 시/도 목록 조회
+    List<String> getGugunNames(@Param("sidoName") String sidoName); // 시/군/구 목록 조회 (시/도로 필터링 가능)
+    List<DongCodeDto> getDongsByGugun(String gugunName); // 특정 시/군/구의 읍/면/동 목록 조회 (하위 호환성)
+    List<DongCodeDto> getDongsBySidoAndGugun(@Param("sidoName") String sidoName, @Param("gugunName") String gugunName); // 특정 시/도와 시/군/구의 읍/면/동 목록 조회
+    List<DongCodeDto> getDongCodesBySido(@Param("sidoName") String sidoName); // 특정 시/도의 모든 dong_code 목록 조회
 
     // Scraps
     void insertScrap(PropertyScrapDto scrap);

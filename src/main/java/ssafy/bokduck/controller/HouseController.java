@@ -40,14 +40,26 @@ public class HouseController {
         return ResponseEntity.ok(houseService.searchDongCodes(dongName));
     }
 
+    @GetMapping("/sido")
+    public ResponseEntity<List<String>> getSidoNames() {
+        return ResponseEntity.ok(houseService.getSidoNames());
+    }
+
     @GetMapping("/gugun")
-    public ResponseEntity<List<String>> getGugunNames() {
-        return ResponseEntity.ok(houseService.getGugunNames());
+    public ResponseEntity<List<String>> getGugunNames(@RequestParam(required = false) String sidoName) {
+        return ResponseEntity.ok(houseService.getGugunNames(sidoName));
     }
 
     @GetMapping("/dong/gugun/{gugunName}")
     public ResponseEntity<List<DongCodeDto>> getDongsByGugun(@PathVariable String gugunName) {
         return ResponseEntity.ok(houseService.getDongsByGugun(gugunName));
+    }
+    
+    @GetMapping("/dong/sido/{sidoName}/gugun/{gugunName}")
+    public ResponseEntity<List<DongCodeDto>> getDongsBySidoAndGugun(
+            @PathVariable String sidoName,
+            @PathVariable String gugunName) {
+        return ResponseEntity.ok(houseService.getDongsBySidoAndGugun(sidoName, gugunName));
     }
 
     @GetMapping("/count")
