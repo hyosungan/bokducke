@@ -37,11 +37,11 @@ public class UserService {
     public String login(String email, String password) {
         UserDto user = userMapper.findByEmail(email);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("이메일이 존재하지 않습니다.");
         }
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         return jwtTokenProvider.createToken(email, user.getUserId());
@@ -56,6 +56,10 @@ public class UserService {
     }
 
     public void updateUser(UserDto userDto) {
+        // 비밀번호가 제공된 경우 암호화
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            userDto.setPasswordHash(passwordEncoder.encode(userDto.getPassword()));
+        }
         userMapper.updateUser(userDto);
     }
 

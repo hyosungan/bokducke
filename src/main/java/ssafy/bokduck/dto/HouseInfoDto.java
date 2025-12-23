@@ -14,6 +14,14 @@ public class HouseInfoDto {
     private Integer buildYear;
     private String latitude;
     private String longitude;
+    
+    // 최신 거래 내역 정보 (목록 조회 시 사용)
+    private String latestDealAmount;
+    private Integer latestDealYear;
+    private Integer latestDealMonth;
+    private Integer latestDealDay;
+    private String latestDealFloor; // 층수
+    private java.math.BigDecimal latestDealArea; // 면적
 
     public HouseInfoDto() {
     }
@@ -120,5 +128,53 @@ public class HouseInfoDto {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public String getLatestDealAmount() {
+        return latestDealAmount;
+    }
+
+    public void setLatestDealAmount(String latestDealAmount) {
+        this.latestDealAmount = latestDealAmount;
+    }
+
+    public Integer getLatestDealYear() {
+        return latestDealYear;
+    }
+
+    public void setLatestDealYear(Integer latestDealYear) {
+        this.latestDealYear = latestDealYear;
+    }
+
+    public Integer getLatestDealMonth() {
+        return latestDealMonth;
+    }
+
+    public void setLatestDealMonth(Integer latestDealMonth) {
+        this.latestDealMonth = latestDealMonth;
+    }
+
+    public Integer getLatestDealDay() {
+        return latestDealDay;
+    }
+
+    public void setLatestDealDay(Integer latestDealDay) {
+        this.latestDealDay = latestDealDay;
+    }
+
+    public String getLatestDealFloor() {
+        return latestDealFloor;
+    }
+
+    public void setLatestDealFloor(String latestDealFloor) {
+        this.latestDealFloor = latestDealFloor;
+    }
+
+    public java.math.BigDecimal getLatestDealArea() {
+        return latestDealArea;
+    }
+
+    public void setLatestDealArea(java.math.BigDecimal latestDealArea) {
+        this.latestDealArea = latestDealArea;
     }
 }

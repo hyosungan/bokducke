@@ -29,9 +29,12 @@
 
     <update id="updateUser" parameterType="ssafy.bokduck.dto.UserDto">
         UPDATE users
-        SET name = #{nickname},
-            phone = #{phone},
+        <set>
+            <if test="nickname != null">name = #{nickname},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="passwordHash != null">password_hash = #{passwordHash},</if>
             updated_at = NOW()
+        </set>
         WHERE user_id = #{userId}
     </update>
 

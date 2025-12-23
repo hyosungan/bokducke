@@ -15,12 +15,15 @@ public interface HouseMapper {
     HouseInfoDto findHouseInfoByAptSeq(String aptSeq);
 
     List<HouseInfoDto> searchHouseInfos(Map<String, Object> params); // dongCode, aptName
+    int countHouseInfos(Map<String, Object> params); // 매물 개수 조회
 
     // House Deals
     List<HouseDealDto> findDealsByAptSeq(String aptSeq);
 
     // Dong Codes
     List<DongCodeDto> searchDongCodes(String dongName);
+    List<String> getGugunNames(); // 시/군/구 목록 조회
+    List<DongCodeDto> getDongsByGugun(String gugunName); // 특정 시/군/구의 읍/면/동 목록 조회
 
     // Scraps
     void insertScrap(PropertyScrapDto scrap);

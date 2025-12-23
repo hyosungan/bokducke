@@ -18,6 +18,12 @@
         <result property="buildYear" column="build_year"/>
         <result property="latitude" column="latitude"/>
         <result property="longitude" column="longitude"/>
+        <result property="latestDealAmount" column="latest_deal_amount"/>
+        <result property="latestDealYear" column="latest_deal_year"/>
+        <result property="latestDealMonth" column="latest_deal_month"/>
+        <result property="latestDealDay" column="latest_deal_day"/>
+        <result property="latestDealFloor" column="latest_deal_floor"/>
+        <result property="latestDealArea" column="latest_deal_area"/>
     </resultMap>
 
     <!-- House Deal Result Map -->
@@ -50,14 +56,121 @@
 
     <!-- Search House Infos -->
     <select id="searchHouseInfos" parameterType="map" resultMap="HouseInfoResultMap">
-        SELECT *
-        FROM houseinfos
+        SELECT 
+            h.apt_seq,
+            h.sgg_cd,
+            h.umd_cd,
+            h.umd_nm,
+            h.jibun,
+            h.road_nm_sgg_cd,
+            h.road_nm,
+            h.road_nm_bonbun,
+            h.road_nm_bubun,
+            h.apt_nm,
+            h.build_year,
+            h.latitude,
+            h.longitude,
+            d.deal_amount as latest_deal_amount,
+            d.deal_year as latest_deal_year,
+            d.deal_month as latest_deal_month,
+            d.deal_day as latest_deal_day,
+            d.floor as latest_deal_floor,
+            d.exclu_use_ar as latest_deal_area
+        FROM houseinfos h
+        LEFT JOIN (
+            SELECT hd1.apt_seq,
+                   hd1.deal_amount,
+                   hd1.deal_year,
+                   hd1.deal_month,
+                   hd1.deal_day,
+                   hd1.floor,
+                   hd1.exclu_use_ar
+            FROM housedeals hd1
+            INNER JOIN (
+                SELECT apt_seq, MAX(no) as max_no
+                FROM housedeals
+                GROUP BY apt_seq
+            ) hd2 ON hd1.apt_seq = hd2.apt_seq AND hd1.no = hd2.max_no
+        ) d ON h.apt_seq = d.apt_seq
         <where>
-            <if test="dongCode != null and dongCode != ''">
-                AND umd_cd = #{dongCode}
+            <if test="umdNm != null and umdNm != ''">
+                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+            </if>
+            <if test="umdNmList != null and umdNmList.size() > 0">
+                AND h.umd_nm IN
+                <foreach collection="umdNmList" item="name" open="(" separator="," close=")">
+                    #{name}
+                </foreach>
             </if>
             <if test="aptName != null and aptName != ''">
-                AND apt_nm LIKE CONCAT('%', #{aptName}, '%')
+                AND h.apt_nm LIKE CONCAT('%', #{aptName}, '%')
+            </if>
+            <if test="minPrice != null and minPrice > 0">
+                AND d.deal_amount IS NOT NULL
+                AND CAST(REPLACE(d.deal_amount, ',', '') AS UNSIGNED) >= #{minPrice}
+            </if>
+            <if test="maxPrice != null and maxPrice > 0">
+                AND d.deal_amount IS NOT NULL
+                AND CAST(REPLACE(d.deal_amount, ',', '') AS UNSIGNED) &lt;= #{maxPrice}
+            </if>
+            <if test="minArea != null and minArea > 0">
+                AND d.exclu_use_ar IS NOT NULL
+                AND d.exclu_use_ar >= #{minArea}
+            </if>
+            <if test="maxArea != null and maxArea > 0">
+                AND d.exclu_use_ar IS NOT NULL
+                AND d.exclu_use_ar &lt;= #{maxArea}
+            </if>
+        </where>
+        ORDER BY h.apt_seq DESC
+        <if test="limit != null and limit > 0">
+            LIMIT ${limit}
+        </if>
+    </select>
+
+    <!-- Count House Infos -->
+    <select id="countHouseInfos" parameterType="map" resultType="int">
+        SELECT COUNT(DISTINCT h.apt_seq)
+        FROM houseinfos h
+        LEFT JOIN (
+            SELECT hd1.apt_seq,
+                   hd1.deal_amount,
+                   hd1.exclu_use_ar
+            FROM housedeals hd1
+            INNER JOIN (
+                SELECT apt_seq, MAX(no) as max_no
+                FROM housedeals
+                GROUP BY apt_seq
+            ) hd2 ON hd1.apt_seq = hd2.apt_seq AND hd1.no = hd2.max_no
+        ) d ON h.apt_seq = d.apt_seq
+        <where>
+            <if test="umdNm != null and umdNm != ''">
+                AND h.umd_nm LIKE CONCAT('%', #{umdNm}, '%')
+            </if>
+            <if test="umdNmList != null and umdNmList.size() > 0">
+                AND h.umd_nm IN
+                <foreach collection="umdNmList" item="name" open="(" separator="," close=")">
+                    #{name}
+                </foreach>
+            </if>
+            <if test="aptName != null and aptName != ''">
+                AND h.apt_nm LIKE CONCAT('%', #{aptName}, '%')
+            </if>
+            <if test="minPrice != null and minPrice > 0">
+                AND d.deal_amount IS NOT NULL
+                AND CAST(REPLACE(d.deal_amount, ',', '') AS UNSIGNED) >= #{minPrice}
+            </if>
+            <if test="maxPrice != null and maxPrice > 0">
+                AND d.deal_amount IS NOT NULL
+                AND CAST(REPLACE(d.deal_amount, ',', '') AS UNSIGNED) &lt;= #{maxPrice}
+            </if>
+            <if test="minArea != null and minArea > 0">
+                AND d.exclu_use_ar IS NOT NULL
+                AND d.exclu_use_ar >= #{minArea}
+            </if>
+            <if test="maxArea != null and maxArea > 0">
+                AND d.exclu_use_ar IS NOT NULL
+                AND d.exclu_use_ar &lt;= #{maxArea}
             </if>
         </where>
     </select>
@@ -75,6 +188,23 @@
         SELECT *
         FROM dongcodes
         WHERE dong_name LIKE CONCAT('%', #{dongName}, '%')
+    </select>
+    
+    <!-- Get Gugun Names (시/군/구 목록) -->
+    <select id="getGugunNames" resultType="string">
+        SELECT DISTINCT gugun_name
+        FROM dongcodes
+        WHERE gugun_name IS NOT NULL AND gugun_name != ''
+        ORDER BY gugun_name
+    </select>
+    
+    <!-- Get Dongs by Gugun (특정 시/군/구의 읍/면/동 목록) -->
+    <select id="getDongsByGugun" parameterType="string" resultMap="DongCodeResultMap">
+        SELECT DISTINCT dong_code, sido_name, gugun_name, dong_name
+        FROM dongcodes
+        WHERE gugun_name = #{gugunName}
+        AND dong_name IS NOT NULL AND dong_name != ''
+        ORDER BY dong_name
     </select>
 
     <!-- Scraps -->

@@ -40,6 +40,21 @@ public class HouseController {
         return ResponseEntity.ok(houseService.searchDongCodes(dongName));
     }
 
+    @GetMapping("/gugun")
+    public ResponseEntity<List<String>> getGugunNames() {
+        return ResponseEntity.ok(houseService.getGugunNames());
+    }
+
+    @GetMapping("/dong/gugun/{gugunName}")
+    public ResponseEntity<List<DongCodeDto>> getDongsByGugun(@PathVariable String gugunName) {
+        return ResponseEntity.ok(houseService.getDongsByGugun(gugunName));
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Integer> countHouses(@RequestParam Map<String, Object> params) {
+        return ResponseEntity.ok(houseService.countHouseInfos(params));
+    }
+
     @PostMapping("/{aptSeq}/scrap")
     public ResponseEntity<?> toggleScrap(@PathVariable String aptSeq, @RequestParam Long userId) {
         // In real app, userId comes from Token. For development, we accept it as param.
