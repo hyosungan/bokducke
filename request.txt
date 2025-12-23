@@ -1,0 +1,19 @@
+﻿
+2025-12-23T18:35:29.790+09:00 DEBUG 20456 --- [nio-808
+0-exec-1] o.s.web.client.DefaultRestClient         : W
+riting [ChatCompletionRequest[messages=[ChatCompletion
+Message[rawContent=Test prompt, role=USER, name=null, 
+toolCallId=null, toolCalls=null, refusal=null, audioOu
+tput=null]], model=gpt-5, store=null, metadata=null, f
+requencyPenalty=null, logitBias=null, logprobs=null, t
+opLogprobs=null, maxTokens=null, maxCompletionTokens=n
+ull, n=null, outputModalities=null, audioParameters=nu
+ll, presencePenalty=null, responseFormat=null, seed=nu
+ll, serviceTier=null, stop=null, stream=false, streamO
+ptions=null, temperature=1.0, topP=null, tools=null, t
+oolChoice=null, parallelToolCalls=null, user=null, rea
+soningEffort=null]] as "application/json" with org.spr
+ingframework.http.converter.json.MappingJackson2HttpMe
+ssageConverter
+
+
