@@ -46,3 +46,4 @@ WHERE h.sgg_cd LIKE '11%'  -- 서울특별시
 GROUP BY h.sgg_cd, h.umd_cd, h.umd_nm
 ORDER BY wrong_count DESC;
 
+

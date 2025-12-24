@@ -49,3 +49,4 @@ WHERE h.sgg_cd IS NOT NULL
   AND (LEFT(dc.dong_code, 5) != h.sgg_cd OR RIGHT(dc.dong_code, 5) != h.umd_cd)
 LIMIT 100;
 
+

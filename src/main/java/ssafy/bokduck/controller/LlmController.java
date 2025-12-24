@@ -4,7 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ssafy.bokduck.dto.LlmRequestDto;
+import ssafy.bokduck.dto.ChatMessageDto;
 import ssafy.bokduck.service.LlmService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/llm")
@@ -56,6 +59,25 @@ public class LlmController {
             java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
             errorResponse.put("error", "SERVER ERROR: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<ChatMessageDto>> getHistory(java.security.Principal principal) {
+        try {
+            Authentication authentication = (Authentication) principal;
+            String token = (String) authentication.getCredentials();
+            java.util.Date expiration = tokenProvider.getExpiration(token);
+
+            // Generate conversationID based on UserID + Expiration Time (same as chat method)
+            String conversationId = principal.getName() + "_" + expiration.getTime();
+
+            List<ChatMessageDto> history = llmService.getHistory(conversationId, 10);
+
+            return ResponseEntity.ok(history);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(java.util.Collections.emptyList());
         }
     }
 }

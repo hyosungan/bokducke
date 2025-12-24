@@ -13,10 +13,12 @@ import org.springframework.web.client.RestClient;
 import ssafy.bokduck.tools.RealEstateTools;
 import ssafy.bokduck.context.PropertySearchContext; // Ensure context is used
 import org.springframework.ai.chat.memory.ChatMemory;
+import ssafy.bokduck.dto.ChatMessageDto;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class LlmService {
@@ -212,5 +214,28 @@ public class LlmService {
             // System.out.println("Extraction failed: " + e.getMessage());
         }
         return null; // Return null if extraction fails, so we don't search with garbage
+    }
+
+    /**
+     * 대화 히스토리 조회
+     * @param conversationId 대화 ID
+     * @param limit 최대 조회 개수
+     * @return 대화 메시지 목록
+     */
+    public List<ChatMessageDto> getHistory(String conversationId, int limit) {
+        List<Message> history = chatMemory.get(conversationId, limit);
+        
+        return history.stream()
+            .filter(msg -> msg.getText() != null && !msg.getText().isEmpty())
+            .map(msg -> {
+                String role = msg.getMessageType().getValue().toLowerCase();
+                // system 메시지는 제외하고 user, assistant만 반환
+                if ("system".equals(role)) {
+                    return null;
+                }
+                return new ChatMessageDto(role, msg.getText());
+            })
+            .filter(dto -> dto != null)
+            .collect(Collectors.toList());
     }
 }

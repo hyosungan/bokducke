@@ -89,3 +89,4 @@ SQL에서 dong_name 매칭을 완전히 제거하고 오직 튜플 매칭만 사
 2. `DEBUG_QUERY.sql` 실행하여 실제 데이터 확인
 3. 문제가 되는 매물의 `apt_seq` 추적
 
+

@@ -37,3 +37,4 @@ WHERE (
 -- 실행 전 확인:
 -- SELECT COUNT(*) FROM houseinfos WHERE latitude IS NULL;
 
+
