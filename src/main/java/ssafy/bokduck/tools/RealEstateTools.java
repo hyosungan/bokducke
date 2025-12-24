@@ -10,6 +10,7 @@ import ssafy.bokduck.mapper.HouseMapper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 @Component
@@ -30,58 +31,81 @@ public class RealEstateTools {
 
     public String searchProperties(String location, int limit) {
         try {
-            // 1. Find Dong Code
-            List<DongCodeDto> dongs = houseMapper.searchDongCodes(location);
-            if (dongs == null || dongs.isEmpty()) {
-                return "죄송합니다. '" + location + "' 지역을 찾을 수 없습니다.";
+            List<HouseInfoDto> listings = new ArrayList<>();
+            Map<String, Object> params = new HashMap<>();
+            location = location.trim();
+
+            // 1. Initial Attempt: Check if it's a specific 'Gu' search
+            if (location.endsWith("구")) {
+                List<DongCodeDto> dongs = houseMapper.searchDongCodes(location);
+                if (dongs != null && !dongs.isEmpty()) {
+                    // Try to match the exact Gu name
+                    String sggCd = dongs.get(0).getDongCode().substring(0, 5);
+                    for (DongCodeDto d : dongs) {
+                        if (d.getGugunName() != null && d.getGugunName().contains(location.replace(" ", ""))) {
+                            sggCd = d.getDongCode().substring(0, 5);
+                            break;
+                        }
+                    }
+                    params.put("sggCd", sggCd);
+                    params.put("limit", limit);
+                    listings = houseMapper.searchHouseInfos(params);
+                }
             }
 
-            // 2. Determine Search Type
-            Map<String, Object> params = new HashMap<>();
-            DongCodeDto first = dongs.get(0);
-            String sggCd = first.getDongCode().substring(0, 5);
+            // 2. If listings empty (not Gu or Gu failed), Broad Search
+            if (listings.isEmpty()) {
+                List<DongCodeDto> codeMatches = houseMapper.searchDongCodes(location);
 
-            // Logic for Gu vs Dong
-            boolean matchGu = false;
-            if (location.endsWith("구")) {
-                for (DongCodeDto d : dongs) {
-                    if (d.getGugunName() != null && d.getGugunName().contains(location.replace(" ", ""))) {
-                        matchGu = true;
-                        sggCd = d.getDongCode().substring(0, 5);
-                        break;
+                if (codeMatches != null && !codeMatches.isEmpty()) {
+                    // Collect distinct Dong Names
+                    List<String> umdNmList = new ArrayList<>();
+                    for (DongCodeDto dto : codeMatches) {
+                        // Logic: if search term is "Sido" or "Gugun", we want all dongs in it.
+                        if (dto.getDongName() != null && !dto.getDongName().isEmpty()) {
+                            if (!umdNmList.contains(dto.getDongName())) {
+                                umdNmList.add(dto.getDongName());
+                            }
+                        }
+                        if (umdNmList.size() >= 50)
+                            break; // Limit to 50 dongs
+                    }
+
+                    if (!umdNmList.isEmpty()) {
+                        params.clear();
+                        params.put("umdNmList", umdNmList);
+                        params.put("limit", limit);
+                        listings = houseMapper.searchHouseInfos(params);
                     }
                 }
             }
 
-            if (matchGu) {
-                params.put("sggCd", sggCd);
-            } else {
-                params.put("umdNm", first.getDongName());
+            // 3. Last Resort: Direct Matches (in case searchDongCodes partial match failed)
+            if (listings.isEmpty()) {
+                params.clear();
+                params.put("umdNm", location);
+                params.put("limit", limit);
+                listings = houseMapper.searchHouseInfos(params);
             }
-            params.put("limit", limit);
 
-            List<HouseInfoDto> listings = houseMapper.searchHouseInfos(params);
-
-            // 3. Store in Context
+            // 4. Store in Context & Debug
             searchContext.clear();
             searchContext.addListings(listings);
 
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             String json = mapper.writeValueAsString(listings);
 
-            // DEBUG: If empty, include debug info in the return string so LLM mentions it
             if (listings.isEmpty()) {
                 StringBuilder debug = new StringBuilder();
-                debug.append("DEBUG INFO: Listings=0");
-                debug.append(", P=").append(params);
-                debug.append(", Dongs=").append(dongs.size());
-                if (!dongs.isEmpty())
-                    debug.append(", 1st=").append(dongs.get(0).getDongName());
+                debug.append("DEBUG INFO: Location='").append(location).append("'");
+                debug.append(", Strategy='Multi-Layer Search'");
+                debug.append(", listings=0");
                 return debug.toString();
             }
             return json;
 
         } catch (Exception e) {
+            e.printStackTrace();
             return "DEBUG INFO: Error=" + e.getMessage();
         }
     }

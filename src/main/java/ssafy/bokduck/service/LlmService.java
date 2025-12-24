@@ -48,10 +48,14 @@ public class LlmService {
         // Trigger search for specific keywords or if the user asks for it
         int requestedLimit = 10; // Default
 
+        // 0. Fetch History for Context
+        List<Message> history = chatMemory.get(conversationId, 10);
+
         // Trigger search
         if (message.contains("찾아줘") || message.contains("검색해줘") || message.contains("알려줘") || message.contains("구")
-                || message.contains("아파트") || message.contains("매물")) {
-            Map<String, Object> extractionResult = extractSearchKeyword(message);
+                || message.contains("아파트") || message.contains("매물") || message.contains("더")
+                || message.contains("보여줘")) {
+            Map<String, Object> extractionResult = extractSearchKeyword(message, history);
             if (extractionResult != null && extractionResult.get("location") != null) {
                 String location = (String) extractionResult.get("location");
                 int limit = 10;
@@ -100,7 +104,18 @@ public class LlmService {
                 2. Use your **INTERNAL KNOWLEDGE** about the apt names and locations provided in [DATA] to select the best matches.
                 3. **FILTERING**: Even if [DATA] has many items, ONLY return the ones that best match the user's request.
                 4. **LIMIT**: The user requested approximately %d items (implied or default). Try to return close to this number of best matches.
-                5. If [DATA] is empty, you may suggest known apartments in your "message" but keep "listings" empty array unless you construct them manually.
+
+                **CRITICAL HANDLING OF EMPTY MATCHES:**
+                5. **CASE A: NO DATA IN DB** (Context [DATA] is "[]"):
+                   - If [DATA] is exactly "[]", it means the requested region (e.g. Cheongju) is NOT supported in our database.
+                   - In this case, return `listings: []` (Empty Array).
+                   - In "message", explain: "죄송하지만 요청하신 지역의 데이터가 저희 DB에 없습니다. (지원: 서울, 부산 등)"
+
+                6. **CASE B: DATA EXISTS BUT FILTERED** (Context [DATA] has items, but none match criteria):
+                   - If [DATA] is NOT empty, but no item matches specific criteria (e.g. price < 100M), you MUST **RELAX THE CONSTRAINTS**.
+                   - Select the closest available options from [DATA].
+                   - **NEVER** return an empty `listings` array in this case.
+                   - **NEVER** use invalid keys like "note" in the `listings` objects. Use standard fields (`aptNm`, `latestDealAmount`, etc.).
                 """
                 .formatted(toolResult.isEmpty() ? "[]" : toolResult, requestedLimit); // Use requestedLimit here
 
@@ -113,6 +128,19 @@ public class LlmService {
             systemMsg.put("role", "system");
             systemMsg.put("content", systemInstruction);
             messages.add(systemMsg);
+        }
+
+        // Add History to Messages
+        for (Message msg : history) {
+            String role = msg.getMessageType().getValue().toLowerCase();
+            String content = msg.getText();
+
+            if (content != null && !content.isEmpty()) {
+                Map<String, Object> historyMsg = new HashMap<>();
+                historyMsg.put("role", role);
+                historyMsg.put("content", content);
+                messages.add(historyMsg);
+            }
         }
         // few shot용
         Map<String, Object> exampleUser1 = new HashMap<>();
@@ -212,20 +240,6 @@ public class LlmService {
         exampleAssistant2.put("content", exampleJson2);
         messages.add(exampleAssistant2);
 
-        // Add History
-        List<Message> history = chatMemory.get(conversationId, 10);
-        for (Message msg : history) {
-            String role = msg.getMessageType().getValue().toLowerCase();
-            String content = msg.getText();
-
-            if (content != null && !content.isEmpty()) {
-                Map<String, Object> historyMsg = new HashMap<>();
-                historyMsg.put("role", role);
-                historyMsg.put("content", content);
-                messages.add(historyMsg);
-            }
-        }
-
         // Add Current User Message
         Map<String, Object> userMsg = new HashMap<>();
         userMsg.put("role", "user");
@@ -277,8 +291,18 @@ public class LlmService {
         return aiResponse;
     }
 
-    private Map<String, Object> extractSearchKeyword(String message) {
+    private Map<String, Object> extractSearchKeyword(String message, List<Message> history) {
         try {
+            // Build history string for context
+            StringBuilder historyContext = new StringBuilder();
+            if (history != null && !history.isEmpty()) {
+                historyContext.append("\nPREVIOUS CONVERSATION:\n");
+                for (Message msg : history) {
+                    historyContext.append(msg.getMessageType().getValue()).append(": ").append(msg.getText())
+                            .append("\n");
+                }
+            }
+
             String prompt = """
                     Analyze the user's sentence to determine the target real estate location in South Korea and the requested number of items.
 
@@ -288,16 +312,19 @@ public class LlmService {
                     3. Do NOT output composite names like "Busan Haeundae-gu". Output ONLY the most specific part (e.g., "Haeundae-gu").
                     4. Extract the numeric quantity requested. If not specified, default to 10.
                     5. Return a strict JSON object: {"location": "...", "limit": 5}
-                    6. If absolutely no location can be inferred, set location to null.
+                    6. **CONTEXT AWARENESS**: Check 'PREVIOUS CONVERSATION'. If the user says "more", "next", "continue", or similar WITHOUT specifying a location, REUSE the location from the previous turn.
+                    7. If absolutely no location can be inferred (neither from current nor history), set location to null.
 
                     Examples:
                     "강남 아파트 3개" -> {"location": "강남", "limit": 3}
-                    "서초구 매물 찾아줘" -> {"location": "서초구", "limit": 10}
+                    "더 보여줘" (History: User asked for Gangnam) -> {"location": "강남", "limit": 10}
                     "부산 바다랑 가까운 곳" -> {"location": "해운대구", "limit": 10}
+
+                    %s
 
                     User Sentence: "%s"
                     """
-                    .formatted(message);
+                    .formatted(historyContext.toString(), message);
 
             String requestBody = """
                     {
