@@ -106,10 +106,11 @@ public class LlmService {
                 4. **LIMIT**: The user requested approximately %d items (implied or default). Try to return close to this number of best matches.
 
                 **CRITICAL HANDLING OF EMPTY MATCHES:**
-                5. **CASE A: NO DATA IN DB** (Context [DATA] is "[]"):
-                   - If [DATA] is exactly "[]", it means the requested region (e.g. Cheongju) is NOT supported in our database.
-                   - In this case, return `listings: []` (Empty Array).
+                5. **CASE A: NO DATA IN DB** (Context [DATA] is "[]" or debug info says listings=0):
+                   - If [DATA] is empty, it means the requested region is NOT supported in our database.
+                   - Return `listings: []` (Empty Array).
                    - In "message", explain: "죄송하지만 요청하신 지역의 데이터가 저희 DB에 없습니다. (지원: 서울, 부산 등)"
+                   - **HALLUCINATION BLOCK**: Do NOT mention "Seogwipo", "Jeju", or any other region unless the user explicitly asked for it. Just say the requested data is missing.
 
                 6. **CASE B: DATA EXISTS BUT FILTERED** (Context [DATA] has items, but none match criteria):
                    - If [DATA] is NOT empty, but no item matches specific criteria (e.g. price < 100M), you MUST **RELAX THE CONSTRAINTS**.
@@ -309,8 +310,10 @@ public class LlmService {
                     RULES:
                     1. If the user mentions a specific administrative name (Dong, Gu, Si), extract it. (Priority: Dong > Gu > Si).
                     2. If the user describes a location (e.g., "near the ocean in Busan"), INFER the most representative administrative district name.
+                       - **LANDMARK INFERENCE**: If the user mentions a specific building or landmark (e.g. "Multicampus", "COEX"), USE YOUR KNOWLEDGE to find its administrative district (Dong/Gu) and output THAT (e.g. "Multicampus" -> "Yeoksam-dong").
                     3. Do NOT output composite names like "Busan Haeundae-gu". Output ONLY the most specific part (e.g., "Haeundae-gu").
                        - **Normalization**: If the location is a district (Gu), MUST append "-gu" (e.g., "Gangnam" -> "Gangnam-gu").
+                       - **POI REMOVAL**: After inferring the location, output ONLY the administrative name from the landmark. (e.g., "Yeoksam-dong Multicampus" -> "Yeoksam-dong").
                     4. Extract the numeric quantity requested. If not specified, default to 10.
                     5. Return a strict JSON object: {"location": "...", "limit": 5}
                     6. **CONTEXT AWARENESS**: Check 'PREVIOUS CONVERSATION'. If the user says "more", "next", "continue", or similar WITHOUT specifying a location, REUSE the location from the previous turn.
@@ -323,6 +326,9 @@ public class LlmService {
                     "낙성대역 근처" -> {"location": "낙성대동", "limit": 10}
                     "울산시 전체" -> {"location": "울산광역시", "limit": 10}
                     "설악산 근처 펜션형 아파트" -> {"location": "속초시", "limit": 10}
+                    "역삼동 멀티캠퍼스 주변" -> {"location": "역삼동", "limit": 10}
+                    "멀티캠퍼스" -> {"location": "역삼동", "limit": 10}
+                    "롯데월드타워" -> {"location": "잠실동", "limit": 10}
 
                     %s
 
