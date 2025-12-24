@@ -1,0 +1,199 @@
+Initialized native services in: C:\Users\SSAFY\.gradle\native
+Initialized jansi services in: C:\Users\SSAFY\.gradle\native
+Found daemon DaemonInfo{pid=20604, address=[51c6e553-14ef-4ec5-924c-6055fcb44221 port:60423, addresses:[/127.0.0.1]], state=Idle, lastBusy=1766475317625, context=DefaultDaemonContext[uid=7bbff6d4-c7d2-4a6e-9be9-acfa8c033d42,javaHome=C:\Users\SSAFY\.antigravity\extensions\redhat.java-1.50.0-win32-x64\jre\21.0.9-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\SSAFY\.gradle\daemon,pid=20604,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=KR,-Duser.language=ko,-Duser.variant]} however its context does not match the desired criteria.
+JVM is incompatible.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Program Files\BellSoft\LibericaJDK-17 (no JDK specified, using current Java home), daemonOpts=[-XX:MaxMetaspaceSize=384m, -XX:+HeapDumpOnOutOfMemoryError, -Xms256m, -Xmx512m, -Dfile.encoding=x-windows-949, -Duser.country=KR, -Duser.language=ko, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=7bbff6d4-c7d2-4a6e-9be9-acfa8c033d42,javaHome=C:\Users\SSAFY\.antigravity\extensions\redhat.java-1.50.0-win32-x64\jre\21.0.9-win32-x86_64,javaVersion=21,javaVendor=Eclipse Adoptium,daemonRegistryDir=C:\Users\SSAFY\.gradle\daemon,pid=20604,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country=KR,-Duser.language=ko,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 11868). The daemon log file: C:\Users\SSAFY\.gradle\daemon\9.2.1\daemon-11868.out.log
+Starting 29th build in daemon [uptime: 6 hrs 41 mins 4.558 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 512 MiB, non-heap usage: 22% of 384 MiB]
+Using 12 worker leases.
+Operational build model parameters: {requiresToolingModels=false, parallelProjectExecution=false, configureOnDemand=false, configurationCache=false, configurationCacheParallelStore=false, configurationCacheParallelLoad=true, isolatedProjects=false, parallelProjectConfiguration=false, intermediateModelCache=false, parallelToolingApiActions=false, invalidateCoupledProjects=false, modelAsProjectDependency=false, resilientModelBuilding=false}
+Now considering [C:\Users\SSAFY\Desktop\bokducke] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Settings evaluated using settings file 'C:\Users\SSAFY\Desktop\bokducke\settings.gradle'.
+Projects loaded. Root project using build file 'C:\Users\SSAFY\Desktop\bokducke\build.gradle'.
+Included projects: [root project 'bokduck']
+
+> Configure project :
+Evaluating root project 'bokduck' using build file 'C:\Users\SSAFY\Desktop\bokducke\build.gradle'.
+Resolved plugin [id: 'java']
+Resolved plugin [id: 'org.springframework.boot', version: '3.4.0']
+Resolved plugin [id: 'io.spring.dependency-management', version: '1.1.7']
+Applying dependency management to configuration 'annotationProcessor' in project 'bokduck'
+Applying dependency management to configuration 'apiElements' in project 'bokduck'
+Applying dependency management to configuration 'archives' in project 'bokduck'
+Applying dependency management to configuration 'bootArchives' in project 'bokduck'
+Applying dependency management to configuration 'compileClasspath' in project 'bokduck'
+Applying dependency management to configuration 'compileOnly' in project 'bokduck'
+Applying dependency management to configuration 'default' in project 'bokduck'
+Applying dependency management to configuration 'developmentOnly' in project 'bokduck'
+Applying dependency management to configuration 'implementation' in project 'bokduck'
+Applying dependency management to configuration 'mainSourceElements' in project 'bokduck'
+Applying dependency management to configuration 'productionRuntimeClasspath' in project 'bokduck'
+Applying dependency management to configuration 'runtimeClasspath' in project 'bokduck'
+Applying dependency management to configuration 'runtimeElements' in project 'bokduck'
+Applying dependency management to configuration 'runtimeOnly' in project 'bokduck'
+Applying dependency management to configuration 'testAndDevelopmentOnly' in project 'bokduck'
+Applying dependency management to configuration 'testAnnotationProcessor' in project 'bokduck'
+Applying dependency management to configuration 'testCompileClasspath' in project 'bokduck'
+Applying dependency management to configuration 'testCompileOnly' in project 'bokduck'
+Applying dependency management to configuration 'testImplementation' in project 'bokduck'
+Applying dependency management to configuration 'testResultsElementsForTest' in project 'bokduck'
+Applying dependency management to configuration 'testRuntimeClasspath' in project 'bokduck'
+Applying dependency management to configuration 'testRuntimeOnly' in project 'bokduck'
+All projects evaluated.
+Task name matched 'test'
+Selected primary task 'test' from project :
+Resolving global dependency management for project 'bokduck'
+Excluding [com.google.protobuf:protobuf-java]
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Excluding []
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test']
+Tasks that were excluded: []
+Resolve mutations for :compileJava (Thread[Execution worker,5,main]) started.
+:compileJava (Thread[Execution worker,5,main]) started.
+
+> Task :compileJava UP-TO-DATE
+Custom actions are attached to task ':compileJava'.
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
+Skipping task ':compileJava' as it is up-to-date.
+Resolve mutations for :processResources (Thread[Execution worker,5,main]) started.
+:processResources (Thread[Execution worker,5,main]) started.
+
+> Task :processResources UP-TO-DATE
+Caching disabled for task ':processResources' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':processResources' as it is up-to-date.
+Resolve mutations for :classes (Thread[Execution worker,5,main]) started.
+:classes (Thread[Execution worker,5,main]) started.
+
+> Task :classes UP-TO-DATE
+Skipping task ':classes' as it has no actions.
+Resolve mutations for :compileTestJava (Thread[Execution worker,5,main]) started.
+:compileTestJava (Thread[Execution worker,5,main]) started.
+
+> Task :compileTestJava UP-TO-DATE
+Custom actions are attached to task ':compileTestJava'.
+Caching disabled for task ':compileTestJava' because:
+  Build cache is disabled
+Skipping task ':compileTestJava' as it is up-to-date.
+Resolve mutations for :processTestResources (Thread[Execution worker,5,main]) started.
+:processTestResources (Thread[Execution worker,5,main]) started.
+
+> Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :testClasses (Thread[Execution worker,5,main]) started.
+:testClasses (Thread[Execution worker,5,main]) started.
+
+> Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+Resolve mutations for :test (Thread[Execution worker,5,main]) started.
+:test (Thread[Execution worker,5,main]) started.
+Gradle Test Executor 2 started executing tests.
+
+> Task :test
+Caching disabled for task ':test' because:
+  Build cache is disabled
+Task ':test' is not up-to-date because:
+  Task has failed previously.
+Starting process 'Gradle Test Executor 2'. Working directory: C:\Users\SSAFY\Desktop\bokducke Command: C:\Program Files\BellSoft\LibericaJDK-17\bin\java.exe -Dorg.gradle.internal.worker.tmpdir=C:\Users\SSAFY\Desktop\bokducke\build\tmp\test\work @C:\Users\SSAFY\.gradle\.tmp\gradle-worker-classpath17330640169817024739txt -Xmx512m -Dfile.encoding=x-windows-949 -Duser.country=KR -Duser.language=ko -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 2'
+Successfully started process 'Gradle Test Executor 2'
+
+InferenceTest STANDARD_OUT
+    15:47:33.672 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [ssafy.bokduck.service.InferenceTest]: InferenceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+    15:47:33.855 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration ssafy.bokduck.BokduckApplication for test class ssafy.bokduck.service.InferenceTest
+
+      .   ____          _            __ _ _
+     /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+    ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+     \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+      '  |____| .__|_| |_|_| |_\__, | / / / /
+     =========|_|==============|___/=/_/_/_/
+
+     :: Spring Boot ::                (v3.4.0)
+
+    2025-12-24T15:47:34.734+09:00  INFO 15732 --- [    Test worker] ssafy.bokduck.service.InferenceTest      : Starting InferenceTest using Java 17.0.9 with PID 15732 (started by SSAFY in C:\Users\SSAFY\Desktop\bokducke)
+    2025-12-24T15:47:34.736+09:00  INFO 15732 --- [    Test worker] ssafy.bokduck.service.InferenceTest      : No active profile set, falling back to 1 default profile: "default"
+    2025-12-24T15:47:37.748+09:00  INFO 15732 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+    2025-12-24T15:47:37.767+09:00  INFO 15732 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+    2025-12-24T15:47:37.767+09:00  INFO 15732 --- [    Test worker] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.33]
+    2025-12-24T15:47:37.876+09:00  INFO 15732 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+    2025-12-24T15:47:37.878+09:00  INFO 15732 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2683 ms
+    2025-12-24T15:47:38.089+09:00  INFO 15732 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+    2025-12-24T15:47:38.578+09:00  INFO 15732 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@50d666a2
+    2025-12-24T15:47:38.581+09:00  INFO 15732 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+    2025-12-24T15:47:39.655+09:00  WARN 15732 --- [    Test worker] .s.s.UserDetailsServiceAutoConfiguration : 
+
+    Using generated security password: e212b827-db52-4b72-9224-152d91978c58
+
+    This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+    2025-12-24T15:47:39.674+09:00  INFO 15732 --- [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+    2025-12-24T15:47:41.021+09:00  INFO 15732 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 53140 (http) with context path '/'
+    2025-12-24T15:47:41.037+09:00  INFO 15732 --- [    Test worker] ssafy.bokduck.service.InferenceTest      : Started InferenceTest in 6.915 seconds (process running for 8.688)
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+Gradle Test Executor 2 finished executing tests.
+2025-12-24T15:47:42.932+09:00  INFO 15732 --- [ionShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-12-24T15:47:43.000+09:00  INFO 15732 --- [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-12-24T15:47:43.006+09:00  INFO 15732 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-12-24T15:47:43.020+09:00  INFO 15732 --- [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+> Task :test
+
+InferenceTest > testLandmarkInference() STANDARD_OUT
+
+    ========== INFERENCE TEST RESULTS ==========
+    2025-12-24T15:47:42.393+09:00 DEBUG 15732 --- [    Test worker] o.s.web.client.RestTemplate              : HTTP POST http://localhost:53140/api/v1/llm/chat
+    2025-12-24T15:47:42.400+09:00 DEBUG 15732 --- [    Test worker] o.s.web.client.RestTemplate              : Accept=[text/plain, application/json, application/yaml, application/*+json, */*]
+    2025-12-24T15:47:42.403+09:00 DEBUG 15732 --- [    Test worker] o.s.web.client.RestTemplate              : Writing [{message=¸ÖÆ¼Ä·ÆÛ½º}] as "application/json"
+    2025-12-24T15:47:42.586+09:00  INFO 15732 --- [o-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+    2025-12-24T15:47:42.586+09:00  INFO 15732 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+    2025-12-24T15:47:42.587+09:00  INFO 15732 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+    2025-12-24T15:47:42.776+09:00 DEBUG 15732 --- [    Test worker] o.s.web.client.RestTemplate              : Response 404 NOT_FOUND
+    2025-12-24T15:47:42.781+09:00 DEBUG 15732 --- [    Test worker] o.s.web.client.RestTemplate              : Reading to [java.lang.String] as "application/json"
+    INPUT: ¸ÖÆ¼Ä·ÆÛ½º
+    RESPONSE: {"timestamp":"2025-12-24T06:47:42.735+00:00","status":404,"error":"Not Found","path":"/api/v1/llm/chat"}
+    --------------------------------------------
+
+InferenceTest > testLandmarkInference() FAILED
+    org.opentest4j.AssertionFailedError: 
+    Expecting value to be true but was false
+        at app//ssafy.bokduck.service.InferenceTest.testLandmarkInference(InferenceTest.java:69)
+
+1 test completed, 1 failed
+Finished generating test XML results (0.002 secs) into: C:\Users\SSAFY\Desktop\bokducke\build\test-results\test
+Generating HTML test report...
+Finished generating test html results (0.006 secs) into: C:\Users\SSAFY\Desktop\bokducke\build\reports\tests\test
+
+> Task :test FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/SSAFY/Desktop/bokducke/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///C:/Users/SSAFY/Desktop/bokducke/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to generate a Build Scan (powered by Develocity).
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 13s
+4 actionable tasks: 1 executed, 3 up-to-date
+Watched directory hierarchies: [C:\Users\SSAFY\Desktop\bokducke]
