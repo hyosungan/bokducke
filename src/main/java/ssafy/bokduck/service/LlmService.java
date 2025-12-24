@@ -312,15 +312,19 @@ public class LlmService {
                     1. If the user mentions a specific administrative name (Dong, Gu, Si), extract it. (Priority: Dong > Gu > Si).
                     2. If the user describes a location (e.g., "near the ocean in Busan"), INFER the most representative administrative district name.
                     3. Do NOT output composite names like "Busan Haeundae-gu". Output ONLY the most specific part (e.g., "Haeundae-gu").
+                       - **Normalization**: If the location is a district (Gu), MUST append "-gu" (e.g., "Gangnam" -> "Gangnam-gu").
                     4. Extract the numeric quantity requested. If not specified, default to 10.
                     5. Return a strict JSON object: {"location": "...", "limit": 5}
                     6. **CONTEXT AWARENESS**: Check 'PREVIOUS CONVERSATION'. If the user says "more", "next", "continue", or similar WITHOUT specifying a location, REUSE the location from the previous turn.
                     7. If absolutely no location can be inferred (neither from current nor history), set location to null.
 
                     Examples:
-                    "강남 아파트 3개" -> {"location": "강남", "limit": 3}
-                    "더 보여줘" (History: User asked for Gangnam) -> {"location": "강남", "limit": 10}
+                    "강남 아파트 3개" -> {"location": "강남구", "limit": 3}
+                    "더 보여줘" (History: User asked for Gangnam) -> {"location": "강남구", "limit": 10}
                     "부산 바다랑 가까운 곳" -> {"location": "해운대구", "limit": 10}
+                    "낙성대역 근처" -> {"location": "낙성대동", "limit": 10}
+                    "울산시 전체" -> {"location": "울산광역시", "limit": 10}
+                    "설악산 근처 펜션형 아파트" -> {"location": "속초시", "limit": 10}
 
                     %s
 
