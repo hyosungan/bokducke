@@ -81,4 +81,13 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    public Date getExpiration(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+    }
 }

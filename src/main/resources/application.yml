@@ -1,10 +1,24 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/bokduck?serverTimezone=UTC&characterEncoding=UTF-8
-    username: root
-    password: "root"
+    url: jdbc:mysql://localhost:3306/ssafy_home?serverTimezone=UTC&characterEncoding=UTF-8
+    username: ssafy
+    password: "ssafy"
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+  sql:
+    init:
+      mode: always
+  ai:
+    openai:
+      base-url: https://gms.ssafy.io/gmsapi/api.openai.com
+      api-key: S14P02AG04-a85b76ca-d893-420e-b425-72c2d9d8fadb
+      chat:
+        options:
+          model: gpt-5
+
+          temperature: 1
+    # jdbc:
+    #   schema-creation: true
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: ssafy.bokduck.dto
@@ -25,7 +39,5 @@ logging:
   level:
     ssafy.bokduck.mapper: DEBUG
     org.springframework.jdbc.core: DEBUG
-
-llm:
-  api-key: S14P02AG04-a85b76ca-d893-420e-b425-72c2d9d8fadb
-  model: gemini-2.5-flash-lite
+    org.springframework.ai: DEBUG
+    org.springframework.web.client: DEBUG

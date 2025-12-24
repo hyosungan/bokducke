@@ -1,0 +1,88 @@
+> Task :clean
+
+> Task :compileJava FAILED
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:28: error: cannot find symbol
+            PropertySearchContext searchContext, ChatMemory chatMemory) {
+                                                 ^
+  symbol:   class ChatMemory
+  location: class LlmService
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:32: error: cannot find symbol
+        this.chatMemory = chatMemory;
+            ^
+  symbol: variable chatMemory
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:65: error: cannot find symbol
+        List<org.springframework.ai.chat.messages.Message> history = chatMemory.get(conversationId, 10);
+                                                                     ^
+  symbol:   variable chatMemory
+  location: class LlmService
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:68: error: cannot find symbol
+            String content = msg.getContent().replace("\n", "\\n").replace("\"", "\\\"");
+                                ^
+  symbol:   method getContent()
+  location: variable msg of type Message
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:120: error: cannot find symbol
+        chatMemory.add(conversationId, new org.springframework.ai.chat.messages.UserMessage(message));
+        ^
+  symbol:   variable chatMemory
+  location: class LlmService
+C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:121: error: cannot find symbol
+        chatMemory.add(conversationId, new org.springframework.ai.chat.messages.AssistantMessage(aiResponse));
+        ^
+  symbol:   variable chatMemory
+  location: class LlmService
+Note: C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+6 errors
+
+[Incubating] Problems report is available at: file:///C:/Users/SSAFY/Desktop/bokducke/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  Note: C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java uses unchecked or unsafe operations.
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:28: error: cannot find symbol
+              PropertySearchContext searchContext, ChatMemory chatMemory) {
+                                                   ^
+    symbol:   class ChatMemory
+    location: class LlmService
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:65: error: cannot find symbol
+          List<org.springframework.ai.chat.messages.Message> history = chatMemory.get(conversationId, 10);
+                                                                       ^
+    symbol:   variable chatMemory
+    location: class LlmService
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:120: error: cannot find symbol
+          chatMemory.add(conversationId, new org.springframework.ai.chat.messages.UserMessage(message));
+          ^
+    symbol:   variable chatMemory
+    location: class LlmService
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:121: error: cannot find symbol
+          chatMemory.add(conversationId, new org.springframework.ai.chat.messages.AssistantMessage(aiResponse));
+          ^
+    symbol:   variable chatMemory
+    location: class LlmService
+  Note: Recompile with -Xlint:unchecked for details.
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:32: error: cannot find symbol
+          this.chatMemory = chatMemory;
+              ^
+    symbol: variable chatMemory
+  C:\Users\SSAFY\Desktop\bokducke\src\main\java\ssafy\bokduck\service\LlmService.java:68: error: cannot find symbol
+              String content = msg.getContent().replace("\n", "\\n").replace("\"", "\\\"");
+                                  ^
+    symbol:   method getContent()
+    location: variable msg of type Message
+  6 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to generate a Build Scan (powered by Develocity).
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.2.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 4s
+2 actionable tasks: 2 executed
