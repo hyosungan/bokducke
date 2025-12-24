@@ -50,9 +50,25 @@ public class LlmService {
         // Trigger search for specific keywords or if the user asks for it
         if (message.contains("찾아줘") || message.contains("검색해줘") || message.contains("알려줘") || message.contains("구")
                 || message.contains("아파트") || message.contains("매물")) {
-            String extractedKeyword = extractSearchKeyword(message);
-            if (extractedKeyword != null && !extractedKeyword.isEmpty() && !extractedKeyword.equalsIgnoreCase("null")) {
-                toolResult = realEstateTools.searchProperties(extractedKeyword);
+            Map<String, Object> extractionResult = extractSearchKeyword(message);
+            if (extractionResult != null && extractionResult.get("location") != null) {
+                String location = (String) extractionResult.get("location");
+                int limit = 10;
+                if (extractionResult.get("limit") != null) {
+                    if (extractionResult.get("limit") instanceof Integer) {
+                        limit = (Integer) extractionResult.get("limit");
+                    } else if (extractionResult.get("limit") instanceof String) {
+                        try {
+                            limit = Integer.parseInt((String) extractionResult.get("limit"));
+                        } catch (NumberFormatException e) {
+                            limit = 10;
+                        }
+                    }
+                }
+
+                if (!"null".equalsIgnoreCase(location)) {
+                    toolResult = realEstateTools.searchProperties(location, limit);
+                }
             }
         }
 
@@ -94,6 +110,103 @@ public class LlmService {
             systemMsg.put("content", systemInstruction);
             messages.add(systemMsg);
         }
+        // few shot용
+        Map<String, Object> exampleUser1 = new HashMap<>();
+        exampleUser1.put("role", "user");
+        exampleUser1.put("content", "부산광역시 해운대구의 아파트 2개 추천해줘");
+        messages.add(exampleUser1);
+        Map<String, Object> exampleAssistant1 = new HashMap<>();
+        exampleAssistant1.put("role", "assistant");
+
+        String exampleJson = """
+                {
+                    "message": "부산광역시 해운대구의 대표적인 아파트 2곳을 추천해 드립니다.",
+                    "listings": [
+                {
+                    "aptSeq": "26350-99",
+                    "sggCd": "26350",
+                    "umdCd": "10600",
+                    "umdNm": "중동",
+                    "jibun": "1763",
+                    "roadNmSggCd": "26350",
+                    "roadNm": "해운대해변로",
+                    "roadNmBonbun": "394",
+                    "roadNmBubun": "0",
+                    "aptNm": "해운대동일",
+                    "buildYear": 1998,
+                    "latitude": "35.1652743714169",
+                    "longitude": "129.171178199358",
+                    "latestDealAmount": "46,000",
+                    "latestDealYear": 2025,
+                    "latestDealMonth": 2,
+                    "latestDealDay": 14,
+                    "latestDealFloor": "18",
+                    "latestDealArea": 84.9
+                },
+                {
+                    "aptSeq": "26350-9",
+                    "sggCd": "26350",
+                    "umdCd": "10500",
+                    "umdNm": "우동",
+                    "jibun": "938",
+                    "roadNmSggCd": "26350",
+                    "roadNm": "해운대로483번길",
+                    "roadNmBonbun": "10",
+                    "roadNmBubun": "0",
+                    "aptNm": "롯데",
+                    "buildYear": 1993,
+                    "latitude": "35.1634441587193",
+                    "longitude": "129.147619699842",
+                    "latestDealAmount": "57,300",
+                    "latestDealYear": 2025,
+                    "latestDealMonth": 2,
+                    "latestDealDay": 11,
+                    "latestDealFloor": "2",
+                    "latestDealArea": 84.84
+                }
+                ]
+                }
+                """;
+        exampleAssistant1.put("content", exampleJson);
+        messages.add(exampleAssistant1);
+
+        Map<String, Object> exampleUser2 = new HashMap<>();
+        exampleUser2.put("role", "user");
+        exampleUser2.put("content", "서울특별시 종로구 청운동 아파트 1개 보여줘");
+        messages.add(exampleUser2);
+
+        Map<String, Object> exampleAssistant2 = new HashMap<>();
+        exampleAssistant2.put("role", "assistant");
+        String exampleJson2 = """
+                {
+                    "message": "서울특별시 종로구 청운동의 아파트 한 곳을 추천 드릴게요. 자하문로33길 43에 위치한 청운현대 apt 입니다.",
+                    "listings": [
+                        {
+                            "aptSeq": "11110-4",
+                            "sggCd": "11110",
+                            "umdCd": "10100",
+                            "umdNm": "청운동",
+                            "jibun": "56-45",
+                            "roadNmSggCd": "11110",
+                            "roadNm": "자하문로33길",
+                            "roadNmBonbun": "43",
+                            "roadNmBubun": "0",
+                            "aptNm": "청운현대",
+                            "buildYear": 2000,
+                            "latitude": "37.5861486417138",
+                            "longitude": "126.966930414705",
+                            "latestDealAmount": "57,300",
+                            "latestDealYear": 2023,
+                            "latestDealMonth": 8,
+                            "latestDealDay": 29,
+                            "latestDealFloor": "4",
+                            "latestDealArea": 103.67
+                        }
+                    ]
+                }
+                """;
+        exampleAssistant2.put("content", exampleJson2);
+        messages.add(exampleAssistant2);
 
         // Add History
         List<Message> history = chatMemory.get(conversationId, 10);
@@ -160,27 +273,31 @@ public class LlmService {
         return aiResponse;
     }
 
-    private String extractSearchKeyword(String message) {
+    private Map<String, Object> extractSearchKeyword(String message) {
         try {
             String prompt = """
-                    Analyze the user's sentence and extract ONLY the South Korean administrative district name (e.g., 'Seoul', 'Gangnam-gu', 'Yeoksam-dong').
-                    Ignore all other words like 'apartment', 'find', 'three', 'price', 'list', etc.
-                    Return ONLY the location name in Korean.
+                    Analyze the user's sentence to determine the target real estate location in South Korea and the requested number of items.
+
+                    RULES:
+                    1. If the user mentions a specific administrative name (Dong, Gu, Si), extract it. (Priority: Dong > Gu > Si).
+                    2. If the user describes a location (e.g., "near the ocean in Busan"), INFER the most representative administrative district name.
+                    3. Do NOT output composite names like "Busan Haeundae-gu". Output ONLY the most specific part (e.g., "Haeundae-gu").
+                    4. Extract the numeric quantity requested. If not specified, default to 10.
+                    5. Return a strict JSON object: {"location": "...", "limit": 5}
+                    6. If absolutely no location can be inferred, set location to null.
 
                     Examples:
-                    "강남 아파트 3개" -> "강남"
-                    "서초구 매물 찾아줘" -> "서초구"
-                    "역삼동 빌라" -> "역삼동"
-                    "Find apartments in Daegu" -> "대구"
+                    "강남 아파트 3개" -> {"location": "강남", "limit": 3}
+                    "서초구 매물 찾아줘" -> {"location": "서초구", "limit": 10}
+                    "부산 바다랑 가까운 곳" -> {"location": "해운대구", "limit": 10}
 
-                    If no specific location is found, output 'null'.
                     User Sentence: "%s"
                     """
                     .formatted(message);
 
             String requestBody = """
                     {
-                        "model": "gpt-5",
+                        "model": "gpt-4o",
                         "messages": [
                             {
                                 "role": "user",
@@ -188,11 +305,13 @@ public class LlmService {
                             }
                         ],
                         "temperature": 0.0,
-                        "stream": false
+                        "stream": false,
+                         "response_format": { "type": "json_object" }
                     }
                     """.formatted(prompt.replace("\n", "\\n").replace("\"", "\\\""));
 
             String endpoint = baseUrl + "/v1/chat/completions";
+
             Map<String, Object> response = restClient.post()
                     .uri(endpoint)
                     .header("Authorization", "Bearer " + apiKey)
@@ -205,15 +324,16 @@ public class LlmService {
                 List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
                 if (!choices.isEmpty()) {
                     Map<String, Object> messageObj = (Map<String, Object>) choices.get(0).get("message");
-                    String extracted = ((String) messageObj.get("content")).trim();
-                    // Remove any trailing punctuation (quotes, periods)
-                    return extracted.replaceAll("^['\"]+|['\"]+$", "").replace(".", "");
+                    String content = (String) messageObj.get("content");
+
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    return mapper.readValue(content, Map.class);
                 }
             }
         } catch (Exception e) {
             // System.out.println("Extraction failed: " + e.getMessage());
         }
-        return null; // Return null if extraction fails, so we don't search with garbage
+        return null;
     }
 
     /**
