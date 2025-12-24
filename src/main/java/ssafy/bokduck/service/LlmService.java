@@ -48,6 +48,9 @@ public class LlmService {
         String toolResult = "";
 
         // Trigger search for specific keywords or if the user asks for it
+        int requestedLimit = 10; // Default
+
+        // Trigger search
         if (message.contains("찾아줘") || message.contains("검색해줘") || message.contains("알려줘") || message.contains("구")
                 || message.contains("아파트") || message.contains("매물")) {
             Map<String, Object> extractionResult = extractSearchKeyword(message);
@@ -65,13 +68,18 @@ public class LlmService {
                         }
                     }
                 }
+                requestedLimit = limit; // Update requestedLimit for system instruction
 
                 if (!"null".equalsIgnoreCase(location)) {
-                    toolResult = realEstateTools.searchProperties(location, limit);
+                    // HYBRID SEARCH STRATEGY:
+                    // Fetch a larger pool candidates (max 50) - 100 was causing 502 Bad Gateway
+                    int candidateLimit = Math.max(limit, 50);
+                    toolResult = realEstateTools.searchProperties(location, candidateLimit);
                 }
             }
         }
 
+        // 1. Prepare Context and System Prompt
         systemInstruction = """
                 You are a helpful real estate assistant.
 
@@ -80,7 +88,7 @@ public class LlmService {
                 The JSON must have the following structure:
                 {
                     "message": "Your natural language response here. Summarize the listings if available, or answer the user's question.",
-                    "listings": [ ... ] // Array of house info objects. If listings are provided in the context below, COPY them here. If not, use your best knowledge or leave empty.
+                    "listings": [ ... ] // Array of house info objects.
                 }
 
                 CONTEXT DATA:
@@ -89,16 +97,14 @@ public class LlmService {
                 %s
                 [DATA END]
 
-                CRITICAL INSTRUCTION FOR "listings":
-                1. If [DATA] is NOT empty, you MUST use it to populate the 'listings' field.
-                2. If [DATA] IS EMPTY "[]", but you are recommending specific apartments in your "message" (e.g. from your internal knowledge), you **MUST** construct JSON objects for them in the 'listings' array.
-                   - Fill 'aptNm' with the name you recommended.
-                   - Fill 'aptSeq' with a placeholder like "manual_1".
-                   - Fill 'umdNm' or 'sggCd' with the location.
-                   - Leave other fields null if unknown.
-                3. The 'listings' array MUST NOT be empty if your message recommends specific properties.
+                CRITICAL INSTRUCTION:
+                1. The user may have specific qualitative criteria (e.g. "near elementary school", "quiet area", "good view").
+                2. Use your **INTERNAL KNOWLEDGE** about the apt names and locations provided in [DATA] to select the best matches.
+                3. **FILTERING**: Even if [DATA] has many items, ONLY return the ones that best match the user's request.
+                4. **LIMIT**: The user requested approximately %d items (implied or default). Try to return close to this number of best matches.
+                5. If [DATA] is empty, you may suggest known apartments in your "message" but keep "listings" empty array unless you construct them manually.
                 """
-                .formatted(toolResult.isEmpty() ? "[]" : toolResult);
+                .formatted(toolResult.isEmpty() ? "[]" : toolResult, requestedLimit); // Use requestedLimit here
 
         // 2. Build Messages List
         List<Map<String, Object>> messages = new java.util.ArrayList<>();
@@ -233,7 +239,7 @@ public class LlmService {
         String requestBody;
         try {
             Map<String, Object> requestMap = new HashMap<>();
-            requestMap.put("model", "gpt-5");
+            requestMap.put("model", "gpt-5.2");
             requestMap.put("messages", messages);
             requestMap.put("temperature", 1.0);
             requestMap.put("stream", false);
@@ -297,7 +303,7 @@ public class LlmService {
 
             String requestBody = """
                     {
-                        "model": "gpt-4o",
+                        "model": "gpt-5.2",
                         "messages": [
                             {
                                 "role": "user",
