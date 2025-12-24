@@ -121,6 +121,9 @@
                 AND d.exclu_use_ar IS NOT NULL
                 AND d.exclu_use_ar &lt;= #{maxArea}
             </if>
+            <if test="sggCd != null and sggCd != ''">
+                AND h.sgg_cd = #{sggCd}
+            </if>
         </where>
         ORDER BY h.apt_seq DESC
         <if test="limit != null and limit > 0">
@@ -172,6 +175,9 @@
                 AND d.exclu_use_ar IS NOT NULL
                 AND d.exclu_use_ar &lt;= #{maxArea}
             </if>
+            <if test="sggCd != null and sggCd != ''">
+                AND h.sgg_cd = #{sggCd}
+            </if>
         </where>
     </select>
 
@@ -188,6 +194,8 @@
         SELECT *
         FROM dongcodes
         WHERE dong_name LIKE CONCAT('%', #{dongName}, '%')
+           OR gugun_name LIKE CONCAT('%', #{dongName}, '%') 
+           OR sido_name LIKE CONCAT('%', #{dongName}, '%')
     </select>
     
     <!-- Get Gugun Names (시/군/구 목록) -->
