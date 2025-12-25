@@ -47,3 +47,4 @@ GROUP BY h.sgg_cd, h.umd_cd, h.umd_nm
 ORDER BY wrong_count DESC;
 
 
+

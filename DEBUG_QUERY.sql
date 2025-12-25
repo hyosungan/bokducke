@@ -64,3 +64,4 @@ GROUP BY h.sgg_cd, h.umd_cd, h.umd_nm, h.apt_nm
 LIMIT 20;
 
 
+

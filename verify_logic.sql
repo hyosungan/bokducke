@@ -50,3 +50,4 @@ WHERE h.sgg_cd IS NOT NULL
 LIMIT 100;
 
 
+

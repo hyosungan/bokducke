@@ -38,3 +38,4 @@ WHERE (
 -- SELECT COUNT(*) FROM houseinfos WHERE latitude IS NULL;
 
 
+
